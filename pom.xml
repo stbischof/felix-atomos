@@ -20,9 +20,8 @@
         <module>atomos.osgi.frameworks</module>
         <module>atomos.runtime</module>
         <module>atomos.tests</module>
-        <module>atomos.substrate.config</module>
         <module>atomos.examples</module>
-        <module>atomos.maven</module>
+        <module>atomos.substrate</module>
     </modules>
 
     <build>

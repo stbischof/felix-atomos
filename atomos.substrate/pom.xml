@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>atomos-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <packaging>pom</packaging>
+    <groupId>org.apache.felix.atomos.substrate</groupId>
+    <artifactId>org.apache.felix.atomos.substrate</artifactId>
+    <name>atomos.substrate</name>
+    <modules>
+        <module>atomos.substrate.api</module>
+        <module>atomos.substrate.core</module>
+        <module>atomos.substrate.config</module>
+        <module>atomos.substrate.maven</module>
+    </modules>
+</project>
