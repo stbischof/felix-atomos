@@ -13,99 +13,247 @@
  */
 package org.apache.felix.atomos.substrate.core;
 
-import java.lang.reflect.Method;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.StringTokenizer;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.felix.atomos.substrate.api.FileType;
 import org.apache.felix.atomos.substrate.api.Launcher;
+import org.apache.felix.atomos.substrate.api.RegisterServiceCall;
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
+import org.apache.felix.atomos.substrate.api.plugin.BundleActivatorPlugin;
+import org.apache.felix.atomos.substrate.api.plugin.ClassPlugin;
+import org.apache.felix.atomos.substrate.api.plugin.ComponentDescription;
+import org.apache.felix.atomos.substrate.api.plugin.ComponentMetaDataPlugin;
 import org.apache.felix.atomos.substrate.api.plugin.FileCollectorPlugin;
+import org.apache.felix.atomos.substrate.api.plugin.FileHandlerPlugin;
+import org.apache.felix.atomos.substrate.api.plugin.JarPlugin;
+import org.apache.felix.atomos.substrate.api.plugin.RegisterServicepPlugin;
 import org.apache.felix.atomos.substrate.api.plugin.SubstratePlugin;
-import org.osgi.util.converter.Converter;
-import org.osgi.util.converter.Converters;
+import org.apache.felix.atomos.substrate.core.scr.mock.EmptyBundeLogger;
+import org.apache.felix.atomos.substrate.core.scr.mock.PathBundle;
+import org.apache.felix.scr.impl.logger.BundleLogger;
+import org.apache.felix.scr.impl.metadata.ComponentMetadata;
+import org.apache.felix.scr.impl.parser.KXml2SAXParser;
+import org.apache.felix.scr.impl.xml.XmlHandler;
+import org.osgi.framework.Constants;
 
 public class LauncherImpl implements Launcher
 {
 
-    private final List<SubstratePlugin<?>> plugins = new ArrayList<>();
-    private Map<String, Object> config;
+    List<SubstratePlugin<?>> getPlugins()
+    {
+        return List.copyOf(plugins);
+    }
+
+    private static List<ComponentDescription> readComponentDescription(JarFile jar)
+        throws Exception
+    {
+
+        BundleLogger logger = new EmptyBundeLogger();
+        List<ComponentMetadata> list = new ArrayList<>();
+        Attributes attributes = jar.getManifest().getMainAttributes();
+        String descriptorLocations = attributes.getValue("Service-Component");// ComponentConstants.SERVICE_COMPONENT);
+        if (descriptorLocations != null)
+        {
+            StringTokenizer st = new StringTokenizer(descriptorLocations, ", ");
+            while (st.hasMoreTokens())
+            {
+                String descriptorLocation = st.nextToken();
+                InputStream stream = jar.getInputStream(jar.getEntry(descriptorLocation));
+                BufferedReader in = new BufferedReader(
+                    new InputStreamReader(stream, "UTF-8"));
+                XmlHandler handler = new XmlHandler(new PathBundle(jar), logger, true,
+                    true);
+
+                KXml2SAXParser parser = new KXml2SAXParser(in);
+                parser.parseXML(handler);
+                list.addAll(handler.getComponentMetadataList());
+            }
+
+            //      //Felix SCR Version-> 2.1.17-SNAPSHOT
+            //      //https://github.com/apache/felix-dev/commit/2d035e21d69c2bb8892d5d5d3e1027befcc3c50b#diff-dad1c7cc45e5c46bca969c95ac501546
+            //      while (st.hasMoreTokens())
+            //      {
+            //          String descriptorLocation = st.nextToken();
+            //          InputStream stream = jar.getInputStream(jar.getEntry(descriptorLocation));
+            //          XmlHandler handler = new XmlHandler(new PathBundle(jar), logger, true, true);
+            //
+            //          final SAXParserFactory factory = SAXParserFactory.newInstance();
+            //          factory.setNamespaceAware(true);
+            //          final SAXParser parser = factory.newSAXParser();
+            //          parser.parse( stream, handler );
+            //          list.addAll(handler.getComponentMetadataList());
+            //      }
+        }
+
+        List<ComponentDescription> cds = list.parallelStream().map(cmd -> {
+            cmd.validate();
+            return new ComponentDescriptionImpl(cmd);
+
+        }).collect(Collectors.toList());
+        return cds;
+    }
+
+    private Collection<SubstratePlugin<?>> plugins = null;
 
     private LauncherImpl()
     {
+
     }
 
-    LauncherImpl(Collection<Class<? extends SubstratePlugin<?>>> pluginClasses, Map<String, Object> config)
+    LauncherImpl(Collection<SubstratePlugin<?>> plugins)
     {
+
         this();
-        this.config = Map.copyOf(config);//unmodifyable
-        initPlugins(pluginClasses);
+        this.plugins = plugins;
 
-        execute();
     }
 
-    public void execute()
+    @Override
+    public SubstrateContext execute()
     {
-        //FileCollector
-        //FileHandler
-        //ClasspathHandler
-        //JarHandler
-        //JarEntryHandler
-        //BundleActivatorHandler
-        //SCDTO
+        return execute(new ContextImpl());
+    }
 
-        ContextImpl context = new ContextImpl();
+    @Override
+    public SubstrateContext execute(SubstrateContext context)
+    {
+
+        //CollectFiles
         orderdPluginsBy(FileCollectorPlugin.class)//
-        .forEachOrdered(p -> p.collectFiles(context));//
+        .peek(System.out::println)//
+        .forEachOrdered(plugin -> plugin.collectFiles(context));//
 
-    }
+        //Visit all files with type
+        orderdPluginsBy(FileHandlerPlugin.class)//
+        .peek(System.out::println)//
+        .forEachOrdered(plugin -> {
 
-    private void initPlugins(
-        Collection<Class<? extends SubstratePlugin<?>>> pluginClasses)
-    {
-        Converter converter = Converters.standardConverter();
-        pluginClasses.parallelStream()//
-        .filter(Objects::nonNull)//
-        .map(c -> {
+            context.getFiles(FileType.ARTEFACT)//
+            .forEach(path -> plugin.handleFile(context, path, FileType.ARTEFACT));
+
+            context.getFiles(FileType.CONFIG)//
+            .forEach(path -> plugin.handleFile(context, path, FileType.CONFIG));
+
+            context.getFiles(FileType.RESSOURCE)//
+            .forEach(
+                path -> plugin.handleFile(context, path, FileType.RESSOURCE));
+        });//
+
+        List<Path> artefacts = context.getFiles(FileType.ARTEFACT).collect(
+            Collectors.toList());
+        URL[] urls = artefacts.stream().map(p -> {
             try
             {
-                return c.getConstructor().newInstance();
+                return p.toUri().toURL();
             }
-            catch (Exception e)
+            catch (MalformedURLException e1)
             {
-                e.printStackTrace();
+                throw new UncheckedIOException(e1);
             }
-            return null;
-        })//
-        .filter(Objects::nonNull)//
-        .forEach(plugins::add);
+        }).toArray(URL[]::new);
 
-        for (SubstratePlugin<?> plugin : plugins)
+        try (URLClassLoader classLoader = URLClassLoader.newInstance(urls, null))
         {
-            //find init Method
-            Optional<Method> oMethod = Stream.of(plugin.getClass().getMethods())//
-                .filter(m -> m.getName().equals("init"))//
-                .filter(m -> m.getParameterCount() == 1)//
-                .filter(m -> m.getParameterTypes()[0] != Object.class)//
-                .findAny();
-            // Convert config and init Plugin
-            if (oMethod.isPresent())
+
+            List<Class<?>> classes = ReflectConfigUtil.loadClasses(artefacts,
+                classLoader);
+
+            orderdPluginsBy(ClassPlugin.class)//
+            .peek(System.out::println)//
+            .forEachOrdered(plugin -> {
+                classes.forEach(c -> plugin.doClass(c, context));
+            });
+
+            for (Path path : artefacts)
             {
-                Method method = oMethod.get();
-                Object cfg = converter.convert(config).to(method.getParameterTypes()[0]);
+                JarFile jar = new JarFile(path.toFile());
+                orderdPluginsBy(JarPlugin.class)//
+                .peek(System.out::println)//
+                .forEachOrdered(plugin -> plugin.doJar(jar, context, classLoader));
+
+                Attributes attributes = jar.getManifest().getMainAttributes();
+                String bundleActivatorClassName = attributes.getValue(
+                    org.osgi.framework.Constants.BUNDLE_ACTIVATOR);
+                if (bundleActivatorClassName == null)
+                {
+                    bundleActivatorClassName = attributes.getValue(
+                        Constants.EXTENSION_BUNDLE_ACTIVATOR);
+                }
+
+                if (bundleActivatorClassName != null)
+                {
+                    Class<?> bundleActivatorClass;
+                    try
+                    {
+                        bundleActivatorClass = classLoader.loadClass(
+                            bundleActivatorClassName.trim());
+                        orderdPluginsBy(BundleActivatorPlugin.class)//
+                        .peek(System.out::println)//
+                        .forEachOrdered(plugin -> plugin.doBundleActivator(
+                            bundleActivatorClass, context, classLoader));
+                    }
+                    catch (ClassNotFoundException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+                //TODO add the from bundleAcrivator
                 try
                 {
-                    method.invoke(plugin, cfg);
+                    List<ComponentDescription> cds = readComponentDescription(jar);
+                    for (ComponentDescription cd : cds)
+                    {
+                        orderdPluginsBy(ComponentMetaDataPlugin.class)//
+                        .peek(System.out::println)//
+                        .forEachOrdered(plugin -> {
+
+                            System.out.println(plugin);
+                            System.out.println(cd);
+                            plugin.doComponentMetaData(cd,
+
+                                context, classLoader);
+                        });
+                    }
                 }
                 catch (Exception e)
                 {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
+                }
+
+                List<RegisterServiceCall> rscs = context.getRegisterServiceCalls();
+                for (RegisterServiceCall rsc : rscs)
+                {
+                    orderdPluginsBy(RegisterServicepPlugin.class)//
+                    .peek(System.out::println)//
+                    .forEachOrdered(plugin -> {
+                        plugin.doRegisterServiceCall(rsc, context, classLoader);
+                    });
                 }
             }
         }
+        catch (IOException e)
+        {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return context;
     }
 
     private <T extends SubstratePlugin<?>> Stream<T> orderdPluginsBy(Class<T> clazz)
@@ -113,5 +261,4 @@ public class LauncherImpl implements Launcher
         return plugins.parallelStream().filter(clazz::isInstance).map(clazz::cast).sorted(
             (p1, p2) -> p1.ranking(clazz) - p2.ranking(clazz));
     }
-
 }

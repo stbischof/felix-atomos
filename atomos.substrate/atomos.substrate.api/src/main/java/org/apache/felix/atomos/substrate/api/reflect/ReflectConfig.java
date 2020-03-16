@@ -13,8 +13,22 @@
  */
 package org.apache.felix.atomos.substrate.api.reflect;
 
+import java.util.Set;
 
 public interface ReflectConfig
 {
 
+    String getClassName();
+
+    boolean isAllPublicConstructors();
+
+    boolean isAllPublicMethods();
+
+    boolean isAllPublicFields();
+
+    Set<ReflectConstructorConfig> getConstructors();
+
+    Set<ReflectFieldConfig> getFields();
+
+    Set<ReflectMethodConfig> getMethods();
 }

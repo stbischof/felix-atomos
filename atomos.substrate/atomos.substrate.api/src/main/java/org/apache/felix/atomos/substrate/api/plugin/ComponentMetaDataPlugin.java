@@ -13,10 +13,11 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
-import java.util.jar.JarFile;
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
 
 public interface ComponentMetaDataPlugin<T> extends SubstratePlugin<T>
 {
 
-    void doComponentMetaData(JarFile jar);
+    void doComponentMetaData(ComponentDescription c, SubstrateContext context,
+        ClassLoader classLoader);
 }

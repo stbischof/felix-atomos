@@ -13,8 +13,9 @@
  */
 package org.apache.felix.atomos.substrate.api.reflect;
 
-
 public interface ReflectConstructorConfig
 {
+
+    String[] getMethodParameterTypes();
 
 }

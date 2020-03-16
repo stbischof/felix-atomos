@@ -11,11 +11,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.core.plugin.gogo;
+package org.apache.felix.atomos.substrate.core.plugins;
 
+import java.nio.file.Path;
+import java.util.List;
+
+import org.apache.felix.atomos.substrate.api.FileType;
 import org.apache.felix.atomos.substrate.api.PluginConfigBase;
 
-public interface GogoPluginConfig extends PluginConfigBase
+public interface DirectoryFileCollectorPluginConfig extends PluginConfigBase
 {
-    String a();
+    List<Path> paths();
+
+    List<String> filters();
+
+    FileType fileType();
+
 }

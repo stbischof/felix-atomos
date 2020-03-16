@@ -11,21 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.core.plugin.gogo;
+package org.apache.felix.atomos.substrate.api;
 
-import org.apache.felix.atomos.substrate.api.plugin.SubstratePlugin;
 
-public class GogoPlugin implements SubstratePlugin<GogoPluginConfig>
+public interface Config
 {
-
-
-
-
-    @Override
-    public void init(GogoPluginConfig config)
-    {
-        System.out.println(config.a());
-
-    }
 
 }

@@ -11,9 +11,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.api;
+package org.apache.felix.atomos.substrate.core.reflect;
 
-public enum Phase
+import org.apache.felix.atomos.substrate.api.reflect.ReflectFieldConfig;
+
+public class FieldConfigImpl implements ReflectFieldConfig
 {
-    BEGIN, DO, END
+    private FieldConfigImpl()
+    {
+    }
+
+    public FieldConfigImpl(String fieldName)
+    {
+        this();
+        this.fieldName = fieldName;
+    }
+
+    @Override
+    public String getFieldName()
+    {
+        return fieldName;
+    }
+
+    private String fieldName;
 }

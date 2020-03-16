@@ -22,17 +22,16 @@ public interface Launcher
 
     static LauncherBuilder defaultBuilder()
     {
-        return builder(false);
+        return builder(true);
     }
 
     static LauncherBuilder emptyBuilder()
     {
-        return builder(true);
+        return builder(false);
     }
 
-    static LauncherBuilder builder(boolean empty)
+    private static LauncherBuilder builder(boolean useDefault)
     {
-
         LauncherBuilder launcherBuilder = ServiceLoader.load(
             Launcher.class.getModule().getLayer(),
             LauncherBuilder.class).findFirst().orElseThrow(
@@ -40,9 +39,12 @@ public interface Launcher
                     String.format("ServiceLoader could not find found: %s",
                         LauncherBuilder.class.getName())));
 
-        launcherBuilder.init(empty);
+        launcherBuilder.init(useDefault);
         return launcherBuilder;
 
-
     }
+
+    SubstrateContext execute();
+
+    SubstrateContext execute(SubstrateContext context);
 }

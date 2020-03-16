@@ -11,28 +11,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.core.plugin.filecoll;
+package org.apache.felix.atomos.substrate.core.reflect;
 
-import java.nio.file.Path;
+import org.apache.felix.atomos.substrate.api.reflect.ReflectMethodConfig;
 
-import org.apache.felix.atomos.substrate.api.FileCollectionContext;
-import org.apache.felix.atomos.substrate.api.plugin.FileCollectorPlugin;
-
-public class DirectoryFileCollectorPlugin implements FileCollectorPlugin<FileCollectorConfig>
+public class MethodConfigImpl extends ConstructorConfigImpl implements ReflectMethodConfig
 {
 
+    private final String name;
 
     @Override
-    public void init(FileCollectorConfig config)
+    public String getName()
     {
-
+        return name;
     }
 
-    @Override
-    public void collectFiles(FileCollectionContext context)
+    public MethodConfigImpl(String name, String[] methodParameters)
     {
-        Path path = null;
-        context.addFile(path);
+        super(methodParameters);
+        this.name = name;
     }
 
 }

@@ -1,37 +1,36 @@
 package org.apache.felix.atomos.substrate.core;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.felix.atomos.substrate.api.Launcher;
 import org.apache.felix.atomos.substrate.api.LauncherBuilder;
 import org.apache.felix.atomos.substrate.api.plugin.SubstratePlugin;
-import org.apache.felix.atomos.substrate.core.plugin.gogo.GogoPlugin;
+import org.apache.felix.atomos.substrate.core.plugins.GogoPlugin;
+import org.osgi.util.converter.Converter;
+import org.osgi.util.converter.Converters;
 
 public class LauncherBuilderImpl implements LauncherBuilder
 {
     public static List<Class<? extends SubstratePlugin<?>>> DEFAULT_PLUGINS = List.of(
         GogoPlugin.class);
 
-    private final Map<String, Object> map = new HashMap<>();
-    private final Collection<Class<? extends SubstratePlugin<?>>> pluginClasses = new HashSet<>();
+    private final Collection<SubstratePlugin<?>> plugins = new HashSet<>();
     private boolean useDefault;
+    private final Converter converter = Converters.standardConverter();
 
-    Optional<Class<? extends SubstratePlugin<?>>> loadClass(String className)
+    Optional<Class<? extends SubstratePlugin<?>>> loadPluginClass(String className)
     {
         if (className != null && !className.isEmpty())
         {
-
             try
             {
                 Class<?> clazz = getClass().getClassLoader().loadClass(className);
-
                 if (Stream.of(clazz.getGenericInterfaces()).filter(
                     SubstratePlugin.class::isInstance).findAny().isPresent())
                 {
@@ -46,95 +45,46 @@ public class LauncherBuilderImpl implements LauncherBuilder
         return Optional.empty();
     }
 
-    @Override
-    public LauncherBuilder addPlugins(Collection<String> pluginClassNames)
+    private void addInitPlugins(Class<? extends SubstratePlugin<?>> pluginClass,
+        Object cfg)
     {
-        if (pluginClassNames != null)
+        try
         {
-            pluginClassNames.forEach(n -> addPlugin(n));
+
+            SubstratePlugin<?> plugin = pluginClass.getConstructor().newInstance();
+
+            //find init Method
+            Optional<Method> oMethod = Stream.of(plugin.getClass().getMethods())//
+                .filter(m -> m.getName().equals("init"))//
+                .filter(m -> m.getParameterCount() == 1)//
+                .filter(m -> m.getParameterTypes()[0] != Object.class)//
+                .findAny();
+            // Convert config and init Plugin
+            if (oMethod.isPresent())
+            {
+                Method method = oMethod.get();
+                Object config = converter.convert(cfg).to(method.getParameterTypes()[0]);
+                method.invoke(plugin, config);
+
+                plugins.add(plugin);
+            }
         }
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder addPlugin(String pluginClassName)
-    {
-
-        Optional<Class<? extends SubstratePlugin<?>>> optional = loadClass(
-            pluginClassName);
-        if (optional.isPresent())
+        catch (Exception e)
         {
-            pluginClasses.add(optional.get());
+            e.printStackTrace();
+            // TODO: handle exception
         }
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder addPlugin(Class<SubstratePlugin<?>> pluginClass)
-    {
-
-        pluginClasses.add(pluginClass);
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder addPlugin(Collection<Class<SubstratePlugin<?>>> pluginClasses)
-    {
-        pluginClasses.addAll(pluginClasses);
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder removePlugin(Class<SubstratePlugin<?>> pluginClass)
-    {
-        removePlugins(List.of(pluginClass));
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder removePlugins(
-        Collection<Class<SubstratePlugin<?>>> pluginClasses)
-    {
-        this.pluginClasses.removeAll(pluginClasses);
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder addConfig(String key, Object value)
-    {
-        map.put(key, value);
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder addConfig(Map<String, Object> config)
-    {
-        map.putAll(config);
-        return this;
-    }
-
-    @Override
-    public LauncherBuilder removeConfig(String key)
-    {
-        map.remove(key);
-        return this;
     }
 
     @Override
     public Launcher build()
     {
-        String env_plugins = System.getProperty(Launcher.SYS_PROP_PLUGINS);
-        if (env_plugins != null)
-        {
-            Stream.of(env_plugins.split(Launcher.SYS_PROP_SEPARATOR)).map(
-                this::loadClass).filter(Objects::nonNull).filter(
-                    o -> o.isPresent()).forEach(p -> pluginClasses.add(p.get()));
-        }
         if (useDefault)
         {
-            pluginClasses.addAll(DEFAULT_PLUGINS);
+            DEFAULT_PLUGINS.forEach(pc -> addPlugin(pc, Map.of()));
+
         }
-        return new LauncherImpl(pluginClasses, map);
+        return new LauncherImpl(plugins);
     }
 
     @Override
@@ -142,4 +92,42 @@ public class LauncherBuilderImpl implements LauncherBuilder
     {
         this.useDefault = useDefault;
     }
+
+    @Override
+    public LauncherBuilder addPlugin(String pluginClassName, Map<String, Object> cfgMap)
+    {
+
+        Optional<Class<? extends SubstratePlugin<?>>> optional = loadPluginClass(
+            pluginClassName);
+        if (optional.isPresent())
+        {
+            addPlugin(optional.get(), cfgMap);
+        }
+        return this;
+    }
+
+    @Override
+    public LauncherBuilder addPlugin(Class<? extends SubstratePlugin<?>> pluginClass,
+        Map<String, Object> cfgMap)
+    {
+        addInitPlugins(pluginClass, cfgMap);
+        return this;
+    }
+
+    @Override
+    public <C> LauncherBuilder addPlugin(Class<? extends SubstratePlugin<C>> pluginClass,
+        C cfg)
+    {
+        addInitPlugins(pluginClass, cfg);
+        return this;
+    }
+
+    @Override
+    public <C> LauncherBuilder addPlugin(SubstratePlugin<C> plugin, C cfg)
+    {
+        plugin.init(cfg);
+        plugins.add(plugin);
+        return this;
+    }
+
 }

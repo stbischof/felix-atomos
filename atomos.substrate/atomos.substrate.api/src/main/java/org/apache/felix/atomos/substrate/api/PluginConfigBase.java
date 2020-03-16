@@ -13,8 +13,10 @@
  */
 package org.apache.felix.atomos.substrate.api;
 
-
 public interface PluginConfigBase
 {
-
+    default String x()
+    {
+        return "x";
+    }
 }

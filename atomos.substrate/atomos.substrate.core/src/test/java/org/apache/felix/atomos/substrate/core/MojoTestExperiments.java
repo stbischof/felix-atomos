@@ -23,8 +23,6 @@ import static org.apache.felix.atomos.substrate.core.TestConstants.getDependency
 import java.nio.file.Path;
 import java.util.List;
 
-import org.apache.felix.atomos.substrate.core.ReflectConfigUtil;
-import org.apache.felix.atomos.substrate.core.reflect.ReflectConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -38,9 +36,9 @@ public class MojoTestExperiments extends TestBase
             //            DEP_FELIX_GOGO_RUNTIME, DEP_FELIX_GOGO_COMMAND, DEP_FELIX_SCR,
             DEP_ORG_OSGI_FRAMEWORK, DEP_FELIX_HTTP_SERVLET_API, DEP_ORG_OSGI_SERVICE_HTTP);
 
-        List<ReflectConfig> rcs = ReflectConfigUtil.reflectConfig(paths);
+        //   List<ReflectConfig> rcs = ReflectConfigUtil.reflectConfig(paths);
 
-        System.out.println(ReflectConfigUtil.json(rcs));
+        //        System.out.println(ReflectConfigUtil.json(rcs));
 
     }
 

@@ -13,9 +13,9 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
-import org.apache.felix.atomos.substrate.api.FileCollectionContext;
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
 
 public interface FileCollectorPlugin<T> extends SubstratePlugin<T>
 {
-    void collectFiles(FileCollectionContext context);
+    void collectFiles(SubstrateContext context);
 }

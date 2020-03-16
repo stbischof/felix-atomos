@@ -11,12 +11,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.api.plugin;
+package org.apache.felix.atomos.substrate.api;
 
-public interface ClassLoaderPlugin<T> extends SubstratePlugin<T>
+public enum FileType
 {
-
-
-    void doClassloader(ClassLoader classLoader);
-
+    CONFIG, ARTEFACT, RESSOURCE
 }
