@@ -24,7 +24,13 @@ public class LauncherTest
     @Test
     void testName() throws Exception
     {
-        assertThrows(RuntimeException.class, () -> Launcher.builder(false));
+        assertThrows(RuntimeException.class, () -> Launcher.defaultBuilder());
+    }
+
+    @Test
+    void testName2() throws Exception
+    {
+        assertThrows(RuntimeException.class, () -> Launcher.emptyBuilder());
     }
 
 }

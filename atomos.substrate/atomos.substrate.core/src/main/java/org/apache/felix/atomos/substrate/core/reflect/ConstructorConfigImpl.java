@@ -13,24 +13,27 @@
  */
 package org.apache.felix.atomos.substrate.core.reflect;
 
-import java.util.Arrays;
+import org.apache.felix.atomos.substrate.api.reflect.ReflectConstructorConfig;
 
-public class MethodConfig extends ConstructorConfig
+public class ConstructorConfigImpl implements ReflectConstructorConfig
 {
     @Override
-    public String toString()
+    public String[] getMethodParameterTypes()
     {
-        return "MethodConfig [name=" + name + ", methodParameters="
-            + Arrays.toString(methodParameterTypes) + "]";
+        return methodParameterTypes;
     }
 
-    public String name;
+    private final String[] methodParameterTypes;
 
-    public MethodConfig(String name, String[] methodParameters)
+    public ConstructorConfigImpl()
     {
-        super(methodParameters);
-        this.name = name;
+        this(new String[] {});
     }
 
+    public ConstructorConfigImpl(String[] methodParameterTypes)
+    {
+
+        this.methodParameterTypes = methodParameterTypes;
+    }
 
 }

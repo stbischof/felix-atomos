@@ -13,10 +13,13 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
+import java.net.URLClassLoader;
 import java.util.jar.JarFile;
+
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
 
 public interface JarPlugin<T> extends SubstratePlugin<T>
 {
 
-    void visitJar(JarFile jar);
+    void doJar(JarFile jar, SubstrateContext context, URLClassLoader classLoader);
 }

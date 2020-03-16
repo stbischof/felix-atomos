@@ -28,7 +28,7 @@ import org.apache.felix.atomos.substrate.core.ReflectConfigUtil;
 import org.apache.felix.atomos.substrate.core.ResourceConfigResult;
 import org.apache.felix.atomos.substrate.core.ResourceConfigUtil;
 import org.apache.felix.atomos.substrate.core.SubstrateUtil;
-import org.apache.felix.atomos.substrate.core.reflect.ReflectConfig;
+import org.apache.felix.atomos.substrate.core.reflect.ReflectConfigImpl;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -142,7 +142,7 @@ public class NativeImageMojo extends AbstractMojo
 
             Path p = SubstrateUtil.substrate(paths, outputDirectory.toPath());
 
-            List<ReflectConfig> reflectConfigs = ReflectConfigUtil.reflectConfig(paths);
+            List<ReflectConfigImpl> reflectConfigs = null;//ReflectConfigUtil.reflectConfig(paths);
 
             String content = ReflectConfigUtil.json(reflectConfigs);
 

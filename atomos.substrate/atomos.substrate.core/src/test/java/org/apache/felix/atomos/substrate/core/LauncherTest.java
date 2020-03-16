@@ -15,7 +15,10 @@ package org.apache.felix.atomos.substrate.core;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import java.util.HashMap;
+
 import org.apache.felix.atomos.substrate.api.Launcher;
+import org.apache.felix.atomos.substrate.core.plugins.DirectoryFileCollectorPlugin;
 import org.junit.jupiter.api.Test;
 
 public class LauncherTest
@@ -24,7 +27,14 @@ public class LauncherTest
     @Test
     void testName() throws Exception
     {
-        assertNotNull(Launcher.builder(true).addConfig("a", "B").build());
+        assertNotNull(Launcher.defaultBuilder().build());
+    }
+
+    @Test
+    void testPluginFileCollector() throws Exception
+    {
+        assertNotNull(Launcher.emptyBuilder().addPlugin(
+            DirectoryFileCollectorPlugin.class, new HashMap<String, Object>()).build());
     }
 
 }

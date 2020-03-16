@@ -13,8 +13,8 @@
  */
 package org.apache.felix.atomos.substrate.api.reflect;
 
-
 public interface ReflectFieldConfig
 {
 
+    String getFieldName();
 }

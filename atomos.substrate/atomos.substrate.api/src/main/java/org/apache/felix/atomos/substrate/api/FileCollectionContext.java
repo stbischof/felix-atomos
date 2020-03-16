@@ -13,11 +13,8 @@
  */
 package org.apache.felix.atomos.substrate.api;
 
-import java.nio.file.Path;
-
 public interface FileCollectionContext extends SubstrateContext
 {
 
-    void addFile(Path path);
 
 }

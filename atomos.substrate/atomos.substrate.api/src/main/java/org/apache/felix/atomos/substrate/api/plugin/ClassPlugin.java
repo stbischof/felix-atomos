@@ -13,8 +13,10 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
+
 public interface ClassPlugin<T> extends SubstratePlugin<T>
 {
 
-    void doClass(Class<?> clazz);
+    void doClass(Class<?> clazz, SubstrateContext context);
 }

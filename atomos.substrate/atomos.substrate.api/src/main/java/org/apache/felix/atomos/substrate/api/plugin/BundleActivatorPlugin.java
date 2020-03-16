@@ -13,10 +13,11 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
-import java.util.jar.JarFile;
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
 
 public interface BundleActivatorPlugin<T> extends SubstratePlugin<T>
 {
 
-    void doBundleActivator(JarFile jar);
+    void doBundleActivator(Class<?> bundleActivatorClass, SubstrateContext context,
+        ClassLoader classLoader);
 }

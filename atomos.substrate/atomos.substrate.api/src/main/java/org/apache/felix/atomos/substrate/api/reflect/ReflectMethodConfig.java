@@ -13,7 +13,9 @@
  */
 package org.apache.felix.atomos.substrate.api.reflect;
 
-public interface ReflectMethodConfig
+public interface ReflectMethodConfig extends ReflectConstructorConfig
 {
+
+    String getName();
 
 }

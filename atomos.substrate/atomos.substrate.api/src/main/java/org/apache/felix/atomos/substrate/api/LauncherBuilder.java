@@ -13,7 +13,6 @@
  */
 package org.apache.felix.atomos.substrate.api;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.apache.felix.atomos.substrate.api.plugin.SubstratePlugin;
@@ -21,25 +20,18 @@ import org.apache.felix.atomos.substrate.api.plugin.SubstratePlugin;
 public interface LauncherBuilder
 {
 
-    LauncherBuilder addPlugin(Class<SubstratePlugin<?>> pluginClasses);
+    <C> LauncherBuilder addPlugin(Class<? extends SubstratePlugin<C>> pluginClasses,
+        C cfg);
 
-    LauncherBuilder addPlugin(Collection<Class<SubstratePlugin<?>>> pluginClasses);
+    <C> LauncherBuilder addPlugin(SubstratePlugin<C> pluginClasses, C cfg);
 
-    LauncherBuilder removePlugin(Class<SubstratePlugin<?>> pluginClasses);
+    LauncherBuilder addPlugin(Class<? extends SubstratePlugin<?>> pluginClasses,
+        Map<String, Object> cfgMap);
 
-    LauncherBuilder removePlugins(Collection<Class<SubstratePlugin<?>>> pluginClasses);
-
-    LauncherBuilder addConfig(String key, Object value);
-
-    LauncherBuilder addConfig(Map<String, Object> config);
-
-    LauncherBuilder removeConfig(String key);
+    LauncherBuilder addPlugin(String pluginClassNames, Map<String, Object> cfgMap);
 
     Launcher build();
 
     void init(boolean empty);
 
-    LauncherBuilder addPlugin(String pluginClass);
-
-    LauncherBuilder addPlugins(Collection<String> pluginClassNames);
 }

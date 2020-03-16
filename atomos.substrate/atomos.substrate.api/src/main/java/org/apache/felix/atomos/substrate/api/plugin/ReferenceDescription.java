@@ -1,5 +1,5 @@
 /*
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the "License")();
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -13,12 +13,35 @@
  */
 package org.apache.felix.atomos.substrate.api.plugin;
 
-import org.apache.felix.atomos.substrate.api.RegisterServiceCall;
-import org.apache.felix.atomos.substrate.api.SubstrateContext;
 
-public interface RegisterServicepPlugin<T> extends SubstratePlugin<T>
+public interface ReferenceDescription
 {
 
-    void doRegisterServiceCall(RegisterServiceCall registerServiceCall,
-        SubstrateContext context, ClassLoader classLoader);
+    String name();
+
+    String interfaceName();
+
+    String cardinality();
+
+    String policy();
+
+    String policyOption();
+
+    String target();
+
+    String bind();
+
+    String unbind();
+
+    String updated();
+
+    String field();
+
+    String fieldOption();
+
+    String scope();
+
+    Integer parameter();
+
+    String collectionType();
 }

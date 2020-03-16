@@ -11,10 +11,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.core.plugin.filecoll;
+package org.apache.felix.atomos.substrate.api.plugin;
 
-import org.apache.felix.atomos.substrate.api.PluginConfigBase;
+import java.nio.file.Path;
 
-public interface FileCollectorConfig extends PluginConfigBase
+import org.apache.felix.atomos.substrate.api.FileType;
+import org.apache.felix.atomos.substrate.api.SubstrateContext;
+
+public interface FileHandlerPlugin<T> extends SubstratePlugin<T>
 {
+    void handleFile(SubstrateContext context, Path path, FileType type);
 }

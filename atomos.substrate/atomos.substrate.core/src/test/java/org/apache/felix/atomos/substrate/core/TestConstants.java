@@ -14,13 +14,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.felix.atomos.substrate.core.reflect.ConstructorConfig;
-import org.apache.felix.atomos.substrate.core.reflect.MethodConfig;
-import org.apache.felix.atomos.substrate.core.reflect.ReflectConfig;
+import org.apache.felix.atomos.substrate.api.reflect.ReflectConfig;
+import org.apache.felix.atomos.substrate.api.reflect.ReflectConstructorConfig;
+import org.apache.felix.atomos.substrate.api.reflect.ReflectMethodConfig;
 
 public class TestConstants
 {
@@ -45,34 +46,36 @@ public class TestConstants
     static String DEP_ORG_OSGI_SERVICE_HTTP = "org.osgi.service.http-";
     static String DEP_ORG_OSGI_SERVICE_LOG = "org.osgi.service.log-";
 
-    static Optional<ConstructorConfig> filterConstructor(ReflectConfig reflectConfig,
+    static Optional<ReflectConstructorConfig> filterConstructor(
+        ReflectConfig reflectConfig,
         String[] parameterTypes)
     {
         assertNotNull(reflectConfig);
-        assertNotNull(reflectConfig.constructor);
+        assertNotNull(reflectConfig.getConstructors());
 
-        return reflectConfig.constructor.stream().filter(
-            c -> Arrays.equals(parameterTypes, c.methodParameterTypes)).findAny();
+        return reflectConfig.getConstructors().stream().filter(
+            c -> Arrays.equals(parameterTypes, c.getMethodParameterTypes())).findAny();
 
     }
 
-    static Optional<MethodConfig> filterMethod(ReflectConfig reflectConfig, String name,
+    static Optional<ReflectMethodConfig> filterMethod(ReflectConfig reflectConfig,
+        String name,
         String[] parameterTypes)
     {
         assertNotNull(reflectConfig);
-        assertNotNull(reflectConfig.methods);
+        assertNotNull(reflectConfig.getMethods());
 
-        return reflectConfig.methods.stream().filter(c -> c.name.equals(name)
-            && Arrays.equals(parameterTypes, c.methodParameterTypes)).findAny();
+        return reflectConfig.getMethods().stream().filter(c -> c.getName().equals(name)
+            && Arrays.equals(parameterTypes, c.getMethodParameterTypes())).findAny();
 
     }
 
-    static ReflectConfig filterReflectConfigByClassName(List<ReflectConfig> list,
+    static ReflectConfig filterReflectConfigByClassName(Collection<ReflectConfig> list,
         String checkClass)
     {
         assertThat(list).isNotNull();
         Optional<ReflectConfig> optional = list.stream().filter(
-            c -> c.className.equals(checkClass)).findFirst();
+            c -> c.getClassName().equals(checkClass)).findFirst();
         assertTrue(optional.isPresent());
         return optional.get();
     }

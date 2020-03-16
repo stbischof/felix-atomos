@@ -27,7 +27,6 @@
             <artifactId>javassist</artifactId>
             <version>3.26.0-GA</version>
         </dependency>
-
     </dependencies>
     <build>
         <plugins>

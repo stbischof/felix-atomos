@@ -11,30 +11,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.felix.atomos.substrate.core.reflect;
+package org.apache.felix.atomos.substrate.api;
 
-import java.util.Arrays;
+import java.util.Map;
 
-public class ConstructorConfig
+public interface RegisterServiceCall
 {
-    public String[] methodParameterTypes;
 
-    public ConstructorConfig()
-    {
-        this(new String[] {});
-    }
+    String[] classes();
 
-    public ConstructorConfig(String[] methodParameters)
-    {
-        methodParameterTypes = methodParameters;
-    }
+    Object service();
 
-    @Override
-    public String toString()
-    {
-        return "ConstructorConfig [methodParameters=" + Arrays.toString(methodParameterTypes)
-        + "]";
-    }
+    Map<String, ?> config();
 }
-
-
