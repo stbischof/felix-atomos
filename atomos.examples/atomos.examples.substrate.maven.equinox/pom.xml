@@ -7,13 +7,6 @@
     </parent>
     <artifactId>org.apache.felix.atomos.examples.substrate.maven.equinox</artifactId>
     <name>atomos.examples.substrate.maven.equinox</name>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.release combine.self="override"></maven.compiler.release>
-        <maven.compiler.source>${java.version}</maven.compiler.source>
-        <maven.compiler.target>${java.version}</maven.compiler.target>
-    </properties>
     <repositories>
         <repository>
             <id>atomos-temp-m2repo</id>
@@ -56,52 +49,35 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-dependencies</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/classpath_lib</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.felix</groupId>
-                <artifactId>org.apache.felix.atomos.maven</artifactId>
+                <artifactId>atomos-maven-plugin</artifactId>
                 <version>${atomos.version}</version>
                 <configuration>
-                    <debug>true</debug>
-                    <additionalInitializeAtBuildTime>
-                        <additionalInitializeAtBuildTime>org.apache.felix.atomos.runtime</additionalInitializeAtBuildTime>
-                        <additionalInitializeAtBuildTime>org.apache.felix.atomos.impl</additionalInitializeAtBuildTime>
-                        <additionalInitializeAtBuildTime>javax.servlet</additionalInitializeAtBuildTime>
-                        <additionalInitializeAtBuildTime>org.apache.felix.service.command.Converter</additionalInitializeAtBuildTime>
-                        <!-- <additionalInitializeAtBuildTime>org.apache.felix.atomos.impl.runtime.base</additionalInitializeAtBuildTime> -->
-                    </additionalInitializeAtBuildTime>
+                    <nativeImage>
+                        <debug>true</debug>
+                        <additionalInitializeAtBuildTime>
+                            <additionalInitializeAtBuildTime>org.apache.felix.atomos.runtime</additionalInitializeAtBuildTime>
+                            <additionalInitializeAtBuildTime>org.apache.felix.atomos.impl</additionalInitializeAtBuildTime>
+                            <additionalInitializeAtBuildTime>javax.servlet</additionalInitializeAtBuildTime>
+                            <additionalInitializeAtBuildTime>org.apache.felix.service.command.Converter</additionalInitializeAtBuildTime>
+                            <!-- <additionalInitializeAtBuildTime>org.apache.felix.atomos.impl.runtime.base</additionalInitializeAtBuildTime> -->
+                        </additionalInitializeAtBuildTime>
+                        <resourceConfigurationFiles>
+                            <resourceConfigurationFile>additionalResourceConfig.json</resourceConfigurationFile>
+                        </resourceConfigurationFiles>
+                        <dynamicProxyConfigurationFiles>
+                            <dynamicProxyConfigurationFile>proxy_config.json</dynamicProxyConfigurationFile>
+                        </dynamicProxyConfigurationFiles>
 
-                    <graalResourceConfigFiles>
-                        <graalResourceConfigFile>additionalResourceConfig.json</graalResourceConfigFile>
-                    </graalResourceConfigFiles>
-                    <dynamicProxyConfigurationFiles>
-                        <dynamicProxyConfigurationFile>proxy_config.json</dynamicProxyConfigurationFile>
-                    </dynamicProxyConfigurationFiles>
-                    <reflectConfigFiles>
-                        <reflectConfigFile>reflectConfig_felix_atomos.json</reflectConfigFile>
-                        <reflectConfigFile>reflectConfig_felix_gogo.json</reflectConfigFile>
-                        <reflectConfigFile>reflectConfig_felix_web.json</reflectConfigFile>
-                        <reflectConfigFile>reflectConfig_jdk.json</reflectConfigFile>
-                        <reflectConfigFile>reflectConfig_jetty.json</reflectConfigFile>
-                    </reflectConfigFiles>
-                    <mainClass>org.apache.felix.atomos.launch.AtomosLauncher</mainClass>
+                        <reflectionConfigurationFiles>
+                            <reflectionConfigurationFile>reflectConfig_felix_atomos.json</reflectionConfigurationFile>
+                            <reflectionConfigurationFile>reflectConfig_felix_gogo.json</reflectionConfigurationFile>
+                            <reflectionConfigurationFile>reflectConfig_felix_web.json</reflectionConfigurationFile>
+                            <reflectionConfigurationFile>reflectConfig_jdk.json</reflectionConfigurationFile>
+                            <reflectionConfigurationFile>reflectConfig_jetty.json</reflectionConfigurationFile>
+                        </reflectionConfigurationFiles>
+                        <!-- <mainClass>org.apache.felix.atomos.launch.AtomosLauncher</mainClass> -->
+                    </nativeImage>
                 </configuration>
                 <executions>
                     <execution>
