@@ -1,0 +1,24 @@
+version: 2
+updates:
+- package-ecosystem: maven
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: org.graalvm.nativeimage:native-image-maven-plugin
+    versions:
+    - 21.0.0
+    - 21.0.0.2
+  - dependency-name: org.apache.felix:org.apache.felix.http.jetty
+    versions:
+    - 4.1.4
+  - dependency-name: biz.aQute.bnd:bnd-maven-plugin
+    versions:
+    - 5.2.0
+  - dependency-name: org.ow2.asm:asm
+    versions:
+    - "9.0"
+  - dependency-name: org.junit.jupiter:junit-jupiter
+    versions:
+    - 5.7.0
